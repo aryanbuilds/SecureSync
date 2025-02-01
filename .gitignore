@@ -1,0 +1,62 @@
+# Virtual environment
+venv/
+.env/
+
+# Python cache and compiled files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Node.js dependencies
+node_modules/
+
+# IDE-specific files
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Logs and databases
+*.log
+*.sqlite
+*.db
+
+# Generated reports
+reports/
+*.pdf
+*.html
+
+# System files
+.DS_Store
+Thumbs.db
+
+# Dependency directories
+*.egg-info/
+dist/
+build/
+
+# Environment variables
+.env
+.env.local
+.env.development
+.env.production
+
+# Local configuration files
+config/local.yaml
+config/dev.yaml
+
+# Byte-compiled / optimized files
+*.pyc
+*.pyo
+*.pyd
+
+# Testing files
+.coverage
+htmlcov/
+.pytest_cache/
+
+# Jupyter Notebook
+.ipynb_checkpoints/
+
+# macOS folder attributes
+**/.DS_Store

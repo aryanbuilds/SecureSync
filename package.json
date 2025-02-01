@@ -4,11 +4,11 @@
     "description": "A web vulnerability scanner tool",
     "main": "index.js",
     "scripts": {
-      "start": "node run.js"
+        "start": "node run.js"
     },
     "dependencies": {
-      "puppeteer": "^10.0.0"
+        "puppeteer": "^24.1.1"
     },
     "author": "Aryan Rai",
     "license": "MIT"
-  }
+}
