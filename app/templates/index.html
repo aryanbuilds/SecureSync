@@ -1,62 +1,60 @@
+templates/index.html
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Advanced Web Vulnerability Scanner</title>
+    <title>Web Vulnerability Scanner</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+    <script src="https://cdn.socket.io/4.0.0/socket.io.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const socket = io();
+            const statusDiv = document.getElementById('scan-status');
+            const resultsDiv = document.getElementById('results');
+            const form = document.getElementById('scan-form');
+
+            socket.on('scan_status', (data) => {
+                statusDiv.innerHTML = `<p class="status-message">${data.status}</p>`;
+            });
+
+            socket.on('scan_complete', (data) => {
+                const results = data.results;
+                let html = '<h2>Scan Results</h2><ul>';
+                results.forEach(result => {
+                    html += `<li class="vuln-${result.severity.toLowerCase()}">
+                        ${result.type} at ${result.url}<br>
+                        Severity: ${result.severity}
+                        ${result.details ? `<br>Details: ${result.details}` : ''}
+                        ${result.payload ? `<br>Payload: ${result.payload}` : ''}
+                    </li>`;
+                });
+                html += '</ul>';
+                resultsDiv.innerHTML = html;
+            });
+
+            form.onsubmit = async (e) => {
+                e.preventDefault();
+                statusDiv.innerHTML = '<p class="status-message">Starting scan...</p>';
+                const formData = new FormData(form);
+                await fetch('/scan', {
+                    method: 'POST',
+                    body: formData
+                });
+            };
+        });
+    </script>
 </head>
 <body>
     <div class="container">
         <h1>Web Vulnerability Scanner</h1>
-        <div class="scanner-form">
-            <input type="url" id="targetUrl" placeholder="Enter website URL" required>
-            <div class="options">
-                <label><input type="checkbox" id="xss" checked> XSS</label>
-                <label><input type="checkbox" id="sql_injection" checked> SQL Injection</label>
-                <!-- Add more options as needed -->
-            </div>
-            <button onclick="startScan()">Start Scan</button>
-        </div>
-        <div id="progress" class="progress-bar"></div>
-        <div id="results" class="results-panel"></div>
+        <form class="scan-form" id="scan-form" method="POST" action="/scan">
+            <input type="url" id="target-url" name="url" placeholder="Enter target URL" required>
+            <button type="submit">Start Scan</button>
+        </form>
+
+        <div id="scan-status" class="status"></div>
+        <div id="results" class="results"></div>
     </div>
-    <script>
-        function startScan() {
-            const url = document.getElementById('targetUrl').value;
-            const options = {
-                xss: document.getElementById('xss').checked,
-                sql_injection: document.getElementById('sql_injection').checked,
-                // Add more options as needed
-            };
-            const progressBar = document.getElementById('progress');
-            progressBar.style.width = '0%';
-            progressBar.style.display = 'block';
-
-            fetch('/scan', {
-                method: 'POST',
-                headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify({url: url, options: options})
-            })
-            .then(response => response.json())
-            .then(data => {
-                displayResults(data);
-                progressBar.style.display = 'none';
-            })
-            .catch(error => {
-                console.error('Error:', error);
-                progressBar.style.display = 'none';
-            });
-        }
-
-        function displayResults(data) {
-            const resultsDiv = document.getElementById('results');
-            if (data.error) {
-                resultsDiv.innerHTML = `<p class="error">${data.error}</p>`;
-                return;
-            }
-            resultsDiv.innerHTML = `<pre>${JSON.stringify(data, null, 2)}</pre>`;
-        }
-    </script>
 </body>
 </html>

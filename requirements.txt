@@ -1,7 +1,7 @@
-Flask
-requests
-beautifulsoup4
-jinja2
-pdfkit
-PyYAML
-urllib3
+Flask==3.1.0
+requests==2.32.3
+flask-socketio==5.3.6
+python-socketio==5.11.0
+eventlet==0.33.3
+PyYAML==6.0.1
+beautifulsoup4==4.12.2

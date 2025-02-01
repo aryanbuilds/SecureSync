@@ -1,14 +1,13 @@
 {
-    "name": "web-vulnerability-scanner",
+    "name": "web-vuln-scanner",
     "version": "1.0.0",
-    "description": "A web vulnerability scanner tool",
-    "main": "index.js",
+    "description": "A web vulnerability scanner",
+    "main": "core/crawler/dynamic_crawler.js",
     "scripts": {
-        "start": "node run.js"
+      "start": "node core/crawler/dynamic_crawler.js"
     },
     "dependencies": {
-        "puppeteer": "^24.1.1"
-    },
-    "author": "Aryan Rai",
-    "license": "MIT"
-}
+      "puppeteer": "^10.0.0"
+    }
+  }
+  

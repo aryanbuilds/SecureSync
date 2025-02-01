@@ -1,34 +1,35 @@
 const puppeteer = require('puppeteer');
 
 (async () => {
-    const url = process.argv[2];
+    const [url, timeout, depth] = process.argv.slice(2);
     const browser = await puppeteer.launch({ headless: true });
     const page = await browser.newPage();
+    const visited = new Set();
+    const endpoints = [];
 
-    await page.goto(url, { waitUntil: 'networkidle2' });
+    const crawl = async (currentUrl, currentDepth) => {
+        if (currentDepth > depth || visited.has(currentUrl)) return;
+        visited.add(currentUrl);
 
-    const scanData = await page.evaluate(() => {
-        const getFormDetails = (form) => {
-            const inputs = Array.from(form.elements).map(el => ({
-                name: el.name,
-                type: el.type,
-                value: el.value || '',
-                placeholder: el.placeholder || ''
-            }));
-            return {
-                action: form.action,
-                method: form.method,
-                inputs: inputs
-            };
-        };
+        try {
+            await page.goto(currentUrl, { waitUntil: 'networkidle2', timeout: timeout * 1000 });
+            const links = await page.evaluate(() => 
+                Array.from(document.querySelectorAll('a')).map(a => a.href)
+            );
 
-        return {
-            links: Array.from(document.querySelectorAll('a[href]')).map(a => a.href),
-            forms: Array.from(document.querySelectorAll('form')).map(getFormDetails),
-            scripts: Array.from(document.scripts).map(script => script.src)
-        };
-    });
+            endpoints.push(currentUrl);
 
+            for (const link of links) {
+                if (link.startsWith(url)) {
+                    await crawl(link, currentDepth + 1);
+                }
+            }
+        } catch (error) {
+            console.error(`Error crawling ${currentUrl}:`, error);
+        }
+    };
+
+    await crawl(url, 0);
     await browser.close();
-    console.log(JSON.stringify(scanData, null, 2));
+    console.log(JSON.stringify(endpoints));
 })();

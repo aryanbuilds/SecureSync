@@ -1,24 +1,26 @@
-import logging
-from core.utils.payload_manager import PayloadManager
-from core.utils.http_utils import HTTPClient
+from ..utils.payload_manager import get_payloads
+from ..utils.http_utils import send_request
 
-class SQLInjector:
-    def __init__(self, http_client: HTTPClient, payload_factory: PayloadManager):
-        self.http_client = http_client
-        self.payloads = payload_factory.get_payloads('sql')
+class SQLiDetector:
+    def __init__(self):
+        self.payloads = get_payloads('sqli')
 
-    def scan(self, endpoint, rate_limit, timeout):
+    async def scan(self, base_url, endpoints):
         vulnerabilities = []
-        for form in endpoint.get('forms', []):
+        for endpoint in endpoints:
             for payload in self.payloads:
-                response = self.http_client.post(endpoint['url'], data={form['field']: payload}, timeout=timeout)
-                if "error" in response['text'].lower() or "sql" in response['text'].lower():
-                    vulnerabilities.append({
-                        'type': 'SQL Injection',
-                        'url': endpoint['url'],
-                        'payload': payload,
-                        'form': form,
-                        'severity': 'Critical'
-                    })
-                    logging.info(f"SQL Injection vulnerability found at {endpoint['url']} with payload {payload}")
+                try:
+                    response = await send_request(f"{base_url}{endpoint}", params={'q': payload})
+                    if self._check_injection(response.text):
+                        vulnerabilities.append({
+                            'type': 'SQL Injection',
+                            'url': f"{base_url}{endpoint}",
+                            'payload': payload,
+                            'severity': 'High'
+                        })
+                except Exception as e:
+                    continue
         return vulnerabilities
+
+    def _check_injection(self, response):
+        return "syntax error" in response.lower()

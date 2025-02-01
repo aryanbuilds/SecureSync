@@ -1,24 +1,14 @@
 import logging
 import logging.config
-import os
+import yaml
 
-class ScannerLogger:
-    def __init__(self, name):
-        self.logger = logging.getLogger(name)
-        self._configure_logger()
+def setup_logging(config_path='config/logging.conf'):
+    with open(config_path, 'r') as f:
+        config = yaml.safe_load(f.read())
+        logging.config.dictConfig(config)
 
-    def _configure_logger(self):
-        config_path = 'config/logging.conf'
-        if os.path.exists(config_path):
-            logging.config.fileConfig(config_path)
-        else:
-            logging.basicConfig(level=logging.INFO)
+def log_info(message):
+    logging.info(message)
 
-    def info(self, message):
-        self.logger.info(message)
-
-    def warning(self, message):
-        self.logger.warning(message)
-
-    def error(self, message):
-        self.logger.error(message)
+def log_error(message):
+    logging.error(message)

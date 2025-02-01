@@ -1,26 +1,27 @@
-import logging
 import re
-from core.utils.http_utils import HTTPClient
+from ..utils.http_utils import send_request
 
-class SensitiveDataDetector:
-    def __init__(self, http_client: HTTPClient):
-        self.http_client = http_client
+class SensitiveDataExposure:
+    def __init__(self):
         self.patterns = {
-            'Credit Card': r'\b(?:\d[ -]*?){13,16}\b',
-            'Social Security Number': r'\b\d{3}-\d{2}-\d{4}\b',
-            'API Key': r'\b[A-Za-z0-9]{32,}\b'
+            'email': re.compile(r'[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}'),
+            'credit_card': re.compile(r'\b(?:\d[ -]*?){13,16}\b'),
+            'ssn': re.compile(r'\b\d{3}-\d{2}-\d{4}\b'),
         }
 
-    def scan(self, endpoint, rate_limit, timeout):
+    async def scan(self, base_url, endpoints):
         vulnerabilities = []
-        response = self.http_client.get(endpoint['url'], timeout=timeout)
-        for data_type, pattern in self.patterns.items():
-            if re.search(pattern, response['text']):
-                vulnerabilities.append({
-                    'type': 'Sensitive Data Exposure',
-                    'url': endpoint['url'],
-                    'data_type': data_type,
-                    'severity': 'Medium'
-                })
-                logging.info(f"Sensitive data ({data_type}) found at {endpoint['url']}")
+        for endpoint in endpoints:
+            try:
+                response = await send_request(f"{base_url}{endpoint}", method='GET')
+                for data_type, pattern in self.patterns.items():
+                    if pattern.search(response.text):
+                        vulnerabilities.append({
+                            'type': 'Sensitive Data Exposure',
+                            'url': response.url,
+                            'details': f'Exposed {data_type} data',
+                            'severity': 'High'
+                        })
+            except Exception as e:
+                continue
         return vulnerabilities

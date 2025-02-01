@@ -1,17 +1,5 @@
-import os
-
-class PayloadManager:
-    @staticmethod
-    def load_payloads(file_path):
-        with open(file_path, 'r') as file:
-            return [line.strip() for line in file if line.strip()]
-
-class PayloadFactory:
-    def __init__(self):
-        self.payloads = {}
-
-    def get_payloads(self, attack_type):
-        if attack_type not in self.payloads:
-            file_path = f'wordlists/{attack_type}.txt'
-            self.payloads[attack_type] = PayloadManager.load_payloads(file_path)
-        return self.payloads[attack_type]
+def get_payloads(detector_type):
+    payload_file = f'wordlists/{detector_type}.txt'
+    with open(payload_file, 'r', encoding='utf-8') as f:
+        payloads = f.read().splitlines()
+    return payloads
