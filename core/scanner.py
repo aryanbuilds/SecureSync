@@ -34,8 +34,6 @@ class Scanner:
     async def run_scan(self):
         endpoints = await self.crawler.crawl(self.target_url)
         results = []
-        
-        # Run detectors in parallel
         tasks = []
         for detector in self.detectors:
             if self.update_status:
