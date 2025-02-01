@@ -2,28 +2,61 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Web Vulnerability Scanner</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Advanced Web Vulnerability Scanner</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
 </head>
 <body>
-    <h1>Web Vulnerability Scanner</h1>
-    <form id="scan-form">
-        <input type="url" id="url-input" placeholder="Enter target URL" required>
-        <button type="submit">Scan</button>
-    </form>
-    <div id="results"></div>
+    <div class="container">
+        <h1>Web Vulnerability Scanner</h1>
+        <div class="scanner-form">
+            <input type="url" id="targetUrl" placeholder="Enter website URL" required>
+            <div class="options">
+                <label><input type="checkbox" id="xss" checked> XSS</label>
+                <label><input type="checkbox" id="sql_injection" checked> SQL Injection</label>
+                <!-- Add more options as needed -->
+            </div>
+            <button onclick="startScan()">Start Scan</button>
+        </div>
+        <div id="progress" class="progress-bar"></div>
+        <div id="results" class="results-panel"></div>
+    </div>
     <script>
-        document.getElementById('scan-form').addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const url = document.getElementById('url-input').value;
-            const response = await fetch('/scan', {
+        function startScan() {
+            const url = document.getElementById('targetUrl').value;
+            const options = {
+                xss: document.getElementById('xss').checked,
+                sql_injection: document.getElementById('sql_injection').checked,
+                // Add more options as needed
+            };
+            const progressBar = document.getElementById('progress');
+            progressBar.style.width = '0%';
+            progressBar.style.display = 'block';
+
+            fetch('/scan', {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ url })
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({url: url, options: options})
+            })
+            .then(response => response.json())
+            .then(data => {
+                displayResults(data);
+                progressBar.style.display = 'none';
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                progressBar.style.display = 'none';
             });
-            const data = await response.json();
-            document.getElementById('results').innerText = JSON.stringify(data, null, 2);
-        });
+        }
+
+        function displayResults(data) {
+            const resultsDiv = document.getElementById('results');
+            if (data.error) {
+                resultsDiv.innerHTML = `<p class="error">${data.error}</p>`;
+                return;
+            }
+            resultsDiv.innerHTML = `<pre>${JSON.stringify(data, null, 2)}</pre>`;
+        }
     </script>
 </body>
 </html>

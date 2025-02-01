@@ -1,0 +1,21 @@
+crawling:
+  max_depth: 3
+  exclude_patterns:
+    - logout
+    - delete
+    - remove
+  respect_robots: true
+
+scanning:
+  max_threads: 10
+  rate_limit: 0.5  # Seconds between requests
+  request_timeout: 15
+  fuzz_parameters: true
+
+reporting:
+  format: both  # html/pdf/both
+  include_evidence: true
+
+security:
+  user_agent: "WebVulnScanner/1.0"
+  proxy: null

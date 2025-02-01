@@ -2,31 +2,33 @@ const puppeteer = require('puppeteer');
 
 (async () => {
     const url = process.argv[2];
-    if (!url) {
-        console.error('URL is required');
-        process.exit(1);
-    }
-
-    const browser = await puppeteer.launch();
+    const browser = await puppeteer.launch({ headless: true });
     const page = await browser.newPage();
+
     await page.goto(url, { waitUntil: 'networkidle2' });
 
-    const data = await page.evaluate(() => {
-        const links = Array.from(document.querySelectorAll('a')).map(a => a.href);
-        const forms = Array.from(document.querySelectorAll('form')).map(form => {
-            const inputs = Array.from(form.elements).map(input => ({
-                name: input.name,
-                type: input.type
+    const scanData = await page.evaluate(() => {
+        const getFormDetails = (form) => {
+            const inputs = Array.from(form.elements).map(el => ({
+                name: el.name,
+                type: el.type,
+                value: el.value || '',
+                placeholder: el.placeholder || ''
             }));
             return {
                 action: form.action,
                 method: form.method,
-                inputs
+                inputs: inputs
             };
-        });
-        return { links, forms };
+        };
+
+        return {
+            links: Array.from(document.querySelectorAll('a[href]')).map(a => a.href),
+            forms: Array.from(document.querySelectorAll('form')).map(getFormDetails),
+            scripts: Array.from(document.scripts).map(script => script.src)
+        };
     });
 
-    console.log(JSON.stringify(data));
     await browser.close();
+    console.log(JSON.stringify(scanData, null, 2));
 })();

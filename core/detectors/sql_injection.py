@@ -1,20 +1,24 @@
+import logging
+from core.utils.payload_manager import PayloadManager
+from core.utils.http_utils import HTTPClient
+
 class SQLInjector:
-    def __init__(self):
-        self.payloads = self.load_payloads()
-    
-    def load_payloads(self):
-        with open('wordlists/sql.txt') as f:
-            return [line.strip() for line in f]
-    
-    def scan(self, url, crawl_data):
+    def __init__(self, http_client: HTTPClient, payload_factory: PayloadManager):
+        self.http_client = http_client
+        self.payloads = payload_factory.get_payloads('sql')
+
+    def scan(self, endpoint, rate_limit, timeout):
         vulnerabilities = []
-        for form in crawl_data['forms']:
+        for form in endpoint.get('forms', []):
             for payload in self.payloads:
-                # Simulate SQL injection
-                vulnerabilities.append({
-                    'type': 'SQL Injection',
-                    'url': url,
-                    'payload': payload,
-                    'severity': 'Critical'
-                })
+                response = self.http_client.post(endpoint['url'], data={form['field']: payload}, timeout=timeout)
+                if "error" in response['text'].lower() or "sql" in response['text'].lower():
+                    vulnerabilities.append({
+                        'type': 'SQL Injection',
+                        'url': endpoint['url'],
+                        'payload': payload,
+                        'form': form,
+                        'severity': 'Critical'
+                    })
+                    logging.info(f"SQL Injection vulnerability found at {endpoint['url']} with payload {payload}")
         return vulnerabilities
