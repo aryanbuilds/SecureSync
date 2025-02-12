@@ -1,3 +1,6 @@
+
+<img width="533" alt="Screenshot 2025-02-12 at 11 26 29 PM" src="https://github.com/user-attachments/assets/edb7caa1-50ab-4e5f-963d-e952654ae63f" />
+
 # SecureSync AI – Intelligent AI-Driven Security for DevOps 
 
 ## Project Overview
