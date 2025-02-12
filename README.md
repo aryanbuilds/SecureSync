@@ -1,4 +1,4 @@
-# SecureSync AI – Intelligent AI-Driven Security for DevOps
+# SecureSync AI – Intelligent AI-Driven Security for DevOps 
 
 ## Project Overview
 SecureSync AI is an advanced, AI-powered vulnerability detection and management system engineered to revolutionize security in the Software Development Lifecycle (SDLC). By integrating static and dynamic application security testing (SAST/DAST) with state-of-the-art machine learning models, SecureSync AI delivers a fully automated security pipeline capable of real-time analysis and threat detection. Optimized for deployment on Azure Cloud, this system leverages containerized microservices, parallel processing, and asynchronous communication to achieve industry-leading performance and cost efficiency.
