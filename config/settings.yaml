@@ -17,3 +17,7 @@ logging:
   root:
     level: DEBUG
     handlers: [console]
+
+report:
+  output_dir: 'reports'
+  formats: ['markdown', 'html']

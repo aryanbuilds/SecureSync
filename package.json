@@ -1,13 +1,12 @@
 {
-    "name": "web-vuln-scanner",
-    "version": "1.0.0",
-    "description": "A web vulnerability scanner",
-    "main": "core/crawler/dynamic_crawler.js",
-    "scripts": {
-      "start": "node core/crawler/dynamic_crawler.js"
-    },
-    "dependencies": {
-      "puppeteer": "^10.0.0"
-    }
+  "name": "securesync-crawler",
+  "version": "1.0.0",
+  "description": "Web crawler for SecureSync",
+  "main": "core/crawler/dynamic_crawler.js",
+  "scripts": {
+    "postinstall": "npx puppeteer install"
+  },
+  "dependencies": {
+    "puppeteer": "^21.1.1"
   }
-  
+}

@@ -24,6 +24,14 @@ class HeaderChecker:
                         'severity': 'High'
                     })
 
+                if 'Strict-Transport-Security' not in headers:
+                    vulnerabilities.append({
+                        'type': 'Missing Security Header',
+                        'url': response.url,
+                        'details': 'Strict-Transport-Security header is missing',
+                        'severity': 'High'
+                    })
+
             except Exception as e:
                 continue
         return vulnerabilities

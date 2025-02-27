@@ -4,15 +4,17 @@ const puppeteer = require('puppeteer');
     const [url, timeout, depth] = process.argv.slice(2);
     const browser = await puppeteer.launch({ headless: true });
     const page = await browser.newPage();
+    await page.setUserAgent('SecureSyncCrawler/1.0');
     const visited = new Set();
     const endpoints = [];
 
     const crawl = async (currentUrl, currentDepth) => {
-        if (currentDepth > depth || visited.has(currentUrl)) return;
+        if (currentDepth > parseInt(depth) || visited.has(currentUrl)) return;
         visited.add(currentUrl);
 
         try {
-            await page.goto(currentUrl, { waitUntil: 'networkidle2', timeout: timeout * 1000 });
+            console.log(`Crawling ${currentUrl} at depth ${currentDepth}`);
+            await page.goto(currentUrl, { waitUntil: 'networkidle2', timeout: parseInt(timeout) * 1000 });
             const links = await page.evaluate(() => 
                 Array.from(document.querySelectorAll('a')).map(a => a.href)
             );

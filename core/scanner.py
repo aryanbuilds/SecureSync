@@ -1,55 +1,54 @@
+from .crawler.crawler import DynamicCrawler
+from .detectors.header_checker import HeaderChecker
+from .detectors.directory_traversal import DirectoryTraversalDetector
+from .detectors.command_injection import CommandInjectionDetector
 import asyncio
-from core.crawler.crawler import DynamicCrawler
-from core.detectors.xss import XSSDetector
-from core.detectors.sql_injection import SQLiDetector
-from core.detectors.command_injection import CommandInjectionDetector
-from core.detectors.sensitive_data import SensitiveDataExposure
-from core.detectors.directory_traversal import DirectoryTraversalDetector
-from core.detectors.header_checker import HeaderChecker
+import logging
 
-class Scanner:
-    def __init__(self, target_url, checks=None, update_status=None):
-        self.target_url = target_url
-        self.checks = checks or ['xss', 'sqli', 'ci', 'sde', 'dt', 'headers']
-        self.crawler = DynamicCrawler()
-        self.detectors = self._initialize_detectors()
-        self.update_status = update_status
-
-    def _initialize_detectors(self):
-        detectors = []
-        if 'xss' in self.checks:
-            detectors.append(XSSDetector())
-        if 'sqli' in self.checks:
-            detectors.append(SQLiDetector())
-        if 'ci' in self.checks:
-            detectors.append(CommandInjectionDetector())
-        if 'sde' in self.checks:
-            detectors.append(SensitiveDataExposure())
-        if 'dt' in self.checks:
-            detectors.append(DirectoryTraversalDetector())
-        if 'headers' in self.checks:
-            detectors.append(HeaderChecker())
-        return detectors
-
-    async def run_scan(self):
-        endpoints = await self.crawler.crawl(self.target_url)
-        results = []
-        tasks = []
-        for detector in self.detectors:
-            if self.update_status:
-                self.update_status(f"Running {detector.__class__.__name__} scan")
-            tasks.append(detector.scan(self.target_url, endpoints))
-        
-        results = await asyncio.gather(*tasks)
-        return self._process_results(results)
-
-    def _process_results(self, raw_results):
-        processed = []
-        for vuln_list in raw_results:
-            processed.extend(vuln_list)
-        return sorted(processed, key=lambda x: x['severity'], reverse=True)
-
-async def scan_website(url, update_status=None):
-    scanner = Scanner(target_url=url, update_status=update_status)
-    results = await scanner.run_scan()
-    return results
+async def scan_website(url, status_callback=None):
+    logging.debug(f"Initializing scan for {url}")
+    if status_callback:
+        status_callback("Initializing crawlers...")
+    
+    crawler = DynamicCrawler(intensity='medium')
+    header_checker = HeaderChecker()
+    dir_traversal = DirectoryTraversalDetector()
+    cmd_injection = CommandInjectionDetector()
+    
+    if status_callback:
+        status_callback("Crawling website for endpoints...")
+    
+    try:
+        endpoints = await crawler.crawl(url)
+        logging.debug(f"Found {len(endpoints)} endpoints")
+    except Exception as e:
+        logging.error(f"Error during crawling: {str(e)}")
+        if status_callback:
+            status_callback(f"Error during crawling: {str(e)}")
+        endpoints = ['/']
+    
+    if status_callback:
+        status_callback(f"Found {len(endpoints)} endpoints. Starting security checks...")
+    
+    header_results = await header_checker.scan(url, endpoints)
+    logging.debug(f"Completed header security check, found {len(header_results)} issues")
+    if status_callback:
+        status_callback(f"Completed header security check, found {len(header_results)} issues")
+    
+    dir_results = await dir_traversal.scan(url, endpoints)
+    logging.debug(f"Completed directory traversal check, found {len(dir_results)} issues")
+    if status_callback:
+        status_callback(f"Completed directory traversal check, found {len(dir_results)} issues")
+    
+    cmd_results = await cmd_injection.scan(url, endpoints)
+    logging.debug(f"Completed command injection check, found {len(cmd_results)} issues")
+    if status_callback:
+        status_callback(f"Completed command injection check, found {len(cmd_results)} issues")
+    
+    all_vulnerabilities = header_results + dir_results + cmd_results
+    logging.debug(f"Scan completed. Found {len(all_vulnerabilities)} vulnerabilities")
+    
+    if status_callback:
+        status_callback(f"Scan completed. Found {len(all_vulnerabilities)} vulnerabilities.")
+    
+    return all_vulnerabilities

@@ -23,4 +23,4 @@ class DirectoryTraversalDetector:
         return vulnerabilities
 
     def _is_vulnerable(self, response_text):
-        return "root:x" in response_text or "windows" in response_text.lower()
+        return "root:x" in response_text or "windows" in response_text.lower() or "C:\\Windows" in response_text

@@ -8,6 +8,8 @@ class CommandInjectionDetector:
         self.error_patterns = [
             re.compile(r'bash: .*: command not found', re.IGNORECASE),
             re.compile(r'sh: .*: not found', re.IGNORECASE),
+            re.compile(r'cmd: .*: not recognized', re.IGNORECASE),
+            re.compile(r'command not found', re.IGNORECASE),
         ]
 
     async def scan(self, base_url, endpoints):

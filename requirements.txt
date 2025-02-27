@@ -1,7 +1,7 @@
-Flask==3.1.0
-requests==2.32.3
-flask-socketio==5.3.6
-python-socketio==5.11.0
-eventlet==0.33.3
-PyYAML==6.0.1
-beautifulsoup4==4.12.2
+httpx==0.24.0
+flask==2.3.3
+flask-socketio==5.3.4
+python-socketio==5.8.0
+markdown==3.4.4
+pyyaml==6.0.1
+types-pyyaml==6.0.12.11
