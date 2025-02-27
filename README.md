@@ -233,9 +233,9 @@ If you need to recreate the virtual environment (e.g., on a new machine), follow
    python -m venv venv
    ```
 
-3. Activate the virtual environment and install dependencies again:
+3. Activate the virtual environment and install dependencies again(for windows):
    ```bash
-   source venv/bin/activate  # or venv\Scripts\activate on Windows
+   venv/Scripts/activate  
    pip install -r requirements.txt
    ```
 
